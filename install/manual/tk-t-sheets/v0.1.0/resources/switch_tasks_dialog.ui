@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>410</width>
+    <height>335</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_6">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QLabel" name="employee_name">
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Employee Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="statement">
+       <property name="styleSheet">
+        <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>You are currently clocked in to:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_project">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Project Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_entity_label">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Asset / Shot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_task_label">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Task</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="start_time_label">
+         <property name="text">
+          <string>Start Time</string>
+         </property>
+         <property name="buddy">
+          <cstring>start_time</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="start_time">
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="current_time_label">
+         <property name="text">
+          <string>Current Time</string>
+         </property>
+         <property name="buddy">
+          <cstring>current_time</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="current_time"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Total Time (hours)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="styleSheet">
+          <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
+         </property>
+         <property name="text">
+          <string>1.5</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="Question">
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Arial&quot;;
+</string>
+       </property>
+       <property name="text">
+        <string>Update your time sheet to the new task?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="new_project">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>New Project Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="new_entity">
+       <property name="text">
+        <string>New Asset / Shot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="new_task">
+       <property name="text">
+        <string>New Task</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="yes_btn">
+       <property name="text">
+        <string>Yes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="no_btn">
+       <property name="text">
+        <string>No</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
