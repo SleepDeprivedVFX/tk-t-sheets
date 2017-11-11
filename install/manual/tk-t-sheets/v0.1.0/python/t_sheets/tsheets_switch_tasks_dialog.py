@@ -80,7 +80,7 @@ class AppDialog(QtGui.QWidget):
         """
         # first, call the base class and let it do its thing.
         QtGui.QWidget.__init__(self)
-        
+
         # now load in the UI that was created in the UI designer
         self.ui = Ui_Dialog() 
         self.ui.setupUi(self)
@@ -652,12 +652,43 @@ class AppDialog(QtGui.QWidget):
                             ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
                     jobcode_data = results[jobcode_id]
                     jobcode_name = jobcode_data['name']
-                    jobcode_task = self.get_sg_translator(sg_task=task)
+                    sg_to_ts_translation = self.get_sg_translator(sg_task=task)
                     print 'Jobcode test:'
                     print jobcode_name
-                    print jobcode_task
-
+                    print sg_to_ts_translation
+                    task_translation = sg_to_ts_translation['task']
+                    task_groups = sg_to_ts_translation['group']
+                    task_people = sg_to_ts_translation['people']
+                    task_short_code = sg_to_ts_translation['short']
+                    people = {}
+                    if task_people:
+                        print 'override people'
+                    else:
+                        if task_groups:
+                            for group in task_groups:
+                                group_id = group['id']
+                                group_name = group['name']
+                                people_in_group = self.get_people_from_group(group_id=group_id, group_name=group_name)
+                                print people_in_group
         return new_ts
+
+    def get_people_from_group(self, group_id=None, group_name=None):
+        people = None
+        if group_id and group_name:
+            print group_name
+            print group_id
+            filters = [
+                ['id', 'is', group_id],
+                ['code', 'is', group_name]
+            ]
+            fields = [
+                'users'
+            ]
+            group_people = self.sg.shotgun.find('Groups', filters, fields)
+            if group_people:
+                people = group_people['users']
+
+        return people
 
     def clock_out_ts_timesheet(self, timesheet_id=None, jobcode_id=None, *args):
         confirm_user = self.confirm_user()
