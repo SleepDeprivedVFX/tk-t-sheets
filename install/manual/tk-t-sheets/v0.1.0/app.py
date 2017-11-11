@@ -102,7 +102,7 @@ class t_sheets_connect(Application):
                     response_data = request
                     return response_data
                 except Exception, e:
-                    print 'Web connection failed!  Error: %s' % e
+                    print 'APP: Send to T-Sheets connection failed!  Error: %s' % e
             else:
                 return False
         else:
@@ -118,7 +118,7 @@ class t_sheets_connect(Application):
                     response_data = json.loads(response.read())
                     return response_data
                 except Exception, e:
-                    print 'Web Connection Failed!  Error: %s' % e
+                    print 'APP: Return from T-Sheets Connection Failed!  Error: %s' % e
             else:
                 return False
         else:
@@ -146,7 +146,7 @@ class t_sheets_connect(Application):
                         print response_data
                         return response_data
                     except Exception, e:
-                        print 'Web Connection Failed! Error: %s' % e
+                        print 'APP: Edit T-Sheets Connection Failed! Error: %s' % e
             else:
                 return False
         else:
@@ -340,7 +340,8 @@ class t_sheets_connect(Application):
                     job_data = get_jobcode[keys]['jobcodes']
                     for job_id, job_info in job_data.items():
                         jobid = job_id
-                        job_tasks = job_info['filtered_customfielditems'].keys()[0]
+                        job_tasks = job_info['filtered_customfielditems'].keys()
+                        job_tasks = job_tasks[-1]
                         job_name = job_info['name']
                         has_children = job_info['has_children']
                         parent_id = job_info['parent_id']

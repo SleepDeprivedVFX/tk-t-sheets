@@ -116,17 +116,19 @@ class AppDialog(QtGui.QWidget):
         self._timerId = None
 
         # lastly, set up our very basic UI
+        # The following is wrong.  It is currently pulling from the Shotgun Context instead of the T-Sheets context
+        # I still need the shotgun context in case someone is not clocked in.
         setup_user = self.confirm_user()
         context = self._app.context
         project_info = context.project
-        self.ui.project_name.setText(project_info['name'])
+        #self.ui.project_name.setText(project_info['name'])
         setup_name = context.user['name']
         self.ui.employee.setText(setup_name)
         task = context.task['name']
-        self.ui.task.setText(task)
+        #self.ui.task.setText(task)
         shot_asset = context.entity['name']
         shot_asset_type = context.entity['type']
-        self.ui.entity.setText(shot_asset)
+        #self.ui.entity.setText(shot_asset)
         setup_email = setup_user['email']
         setup_timesheet = self.get_ts_user_timesheet(email=setup_email)
         self.ui.no_btn.clicked.connect(self.no)
@@ -138,28 +140,38 @@ class AppDialog(QtGui.QWidget):
             setup_user_id = setup_ts_data['user_id']
             setup_jobcode_id = setup_timecard['jobcode_id']
             setup_start = setup_timecard['start']
+            get_jobcode_data = self.get_ts_jobcode(jobcode=setup_jobcode_id)
+            ts_project_info = self.get_ts_project_from_sg(project_name=project_info['name'])
+            if ts_project_info:
+                for tsid, tsproject in ts_project_info.items():
+                    ts_project_name = tsproject
+                    ts_project_id = tsid
+            else:
+                ts_project_id = None
+                ts_project_name = None
+            setup_ts_name = get_jobcode_data[get_jobcode_data.keys()[0]]['name']
+            ts_task_id = get_jobcode_data[get_jobcode_data.keys()[0]]['tasks']
+            ts_task = setup_timecard['customfields'][ts_task_id]
+            self.ui.project_name.setText(ts_project_name)
+            self.ui.task.setText(ts_task)
+            self.ui.entity.setText(setup_ts_name)
             start_datetime = self.iso_to_qt_datetime(iso_datetime=setup_start)
             self.ui.start_time.setDateTime(start_datetime)
             self.ui.start_time.setEnabled(False)
             self.ui.current_time.setEnabled(False)
+            self.ui.total_time.setEnabled(False)
             self.ui.yes_btn.clicked.connect(partial(self.clock_out_ts_timesheet,
                                                     timesheet_id=setup_ts_id, jobcode_id=setup_jobcode_id))
-            self.start()
+            self.start(pass_time=setup_start)
         else:
             # This should eventually load the Clock_in Script... Not sure how to call that one... Yet
             # Perhaps what I'll do is just have it rewrite the UI a bit to compensate.
             return
 
-        # {u'end': u'', u'tz_str': u'tsPT', u'notes': u'', u'jobcode_id': 6510303, u'locked': 0, u'on_the_clock': True,
-        #  u'start': u'2017-11-08T15:11:19-08:00', u'last_modified': u'2017-11-08T23:11:19+00:00',
-        #  u'location': u'(Torrance, CA?)', u'date': u'2017-11-08', u'duration': 0, u'user_id': 124724,
-        #  u'customfields': {u'15906': u'Pipeline TD', u'30616': u'', u'15904': u'T.D.'}, u'type': u'regular',
-        #  u'id': 21410965, u'tz': -8}
-
     # ------------------------------------------------------------------------------------------------------------------
     # Clock Functions
     # ------------------------------------------------------------------------------------------------------------------
-    def loop_generator(self):
+    def loop_generator(self, pass_time=None):
         now_date = str(datetime.date(datetime.now()))
         now_time = str(datetime.time(datetime.now()))
         split_date = now_date.split('-')
@@ -185,11 +197,20 @@ class AppDialog(QtGui.QWidget):
                     s = 0
             set_datetime = QtCore.QDateTime(Y, M, D, h, m, s)
             self.ui.current_time.setDateTime(set_datetime)
+            if pass_time:
+                split_start = pass_time.replace('T', ' ')
+                split_start = split_start.rsplit('-', 1)[0]
+                split_end = self.get_iso_timestamp().replace('T', ' ').rsplit('-', 1)[0]
+                time_delta = datetime.strptime(split_end, '%Y-%m-%d %H:%M:%S')\
+                             - datetime.strptime(split_start, '%Y-%m-%d %H:%M:%S')
+                splittime = str(time_delta).split(':')
+                total_time = QtCore.QTime(int(splittime[0]), int(splittime[1]), int(splittime[2]))
+                self.ui.total_time.setTime(total_time)
             yield
 
-    def start(self):
+    def start(self, pass_time=None):
         self.stop()
-        self._generator = self.loop_generator()
+        self._generator = self.loop_generator(pass_time=pass_time)
         self._timerId = self.startTimer(1000)
 
     def stop(self):
@@ -231,7 +252,7 @@ class AppDialog(QtGui.QWidget):
                     response_data = json.loads(response.read())
                     return response_data
                 except Exception, e:
-                    print 'Web connection failed!  Error: %s' % e
+                    print 'CLOCK OUT: Send to T-Sheets connection failed!  Error: %s' % e
             else:
                 return False
         else:
@@ -247,7 +268,7 @@ class AppDialog(QtGui.QWidget):
                     response_data = json.loads(response.read())
                     return response_data
                 except Exception, e:
-                    print 'Web Connection Failed!  Error: %s' % e
+                    print 'CLOCK OUT: Return from T-Sheets Connection Failed!  Error: %s' % e
             else:
                 return False
         else:
@@ -275,7 +296,7 @@ class AppDialog(QtGui.QWidget):
                         print response_data
                         return response_data
                     except Exception, e:
-                        print 'Web Connection Failed! Error: %s' % e
+                        print 'CLOCK OUT: Edit T-Sheets Connection Failed! Error: %s' % e
             else:
                 return False
         else:
@@ -461,6 +482,67 @@ class AppDialog(QtGui.QWidget):
                     clocked_out = True
         self.no()
         return clocked_out
+
+    def get_ts_project_from_sg(self, project_name=None):
+        project_info = {}
+        if project_name:
+            ts_projects = self.get_ts_active_projects()
+            for ts_id, proj_name in ts_projects.items():
+                if proj_name == project_name:
+                    project_info[ts_id] = proj_name
+        return project_info
+
+    def get_ts_active_projects(self):
+        jobs_params = {'active': 'yes'}
+        jobs_js = self._return_from_tsheets(page='jobcodes', data=jobs_params)
+        ts_projects = {}
+        for j_type, result_data in jobs_js.items():
+            if j_type == 'results':
+                jobs_data = result_data['jobcodes']
+                for project in jobs_data:
+                    data = jobs_data[project]
+                    has_children = data['has_children']
+                    if has_children:
+                        project_name = data['name']
+                        project_id = data['id']
+                        ts_projects[project_id] = project_name
+        return ts_projects
+
+    def get_ts_jobtasks(self, task_id=None):
+        task_info = {}
+        if task_id:
+            data = {
+                "data":
+                    [
+                        {
+                            "customfield_id": "%s" % task_id
+                        }
+                    ]
+            }
+            get_data = self._return_from_tsheets('customfields', data=data)
+            if get_data:
+                print get_data
+
+        return task_info
+
+    def get_ts_jobcode(self, jobcode=None):
+        # print 'Get Jobcode %s' % jobcode
+        jobcode_data = {}
+        if jobcode:
+            data = {'ids': jobcode}
+            get_jobcode = self._return_from_tsheets(page='jobcodes', data=data)
+            for keys in get_jobcode:
+                if keys == 'results':
+                    job_data = get_jobcode[keys]['jobcodes']
+                    for job_id, job_info in job_data.items():
+                        jobid = job_id
+                        job_tasks = job_info['filtered_customfielditems'].keys()[1]
+                        job_name = job_info['name']
+                        has_children = job_info['has_children']
+                        parent_id = job_info['parent_id']
+                        jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
+                                               'parent_id': parent_id}
+        return jobcode_data
 
     def no(self):
         self.close()
