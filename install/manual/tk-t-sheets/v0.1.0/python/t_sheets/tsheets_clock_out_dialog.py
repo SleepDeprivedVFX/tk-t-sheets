@@ -483,6 +483,106 @@ class AppDialog(QtGui.QWidget):
         self.no()
         return clocked_out
 
+    def clock_in_ts_timesheet(self, ctx=None):
+        """
+        Clock_in_ts_timesheet is going to be a little tricky.
+        It will have to split out the context, and then find the jobcode_id based on the project, shot/asset & job task.
+        The user_id, start time and other things will have to be collected as well.
+        :param ctx:
+        :return:
+        """
+        new_ts = {}
+        confirmed_user = self.confirm_user()
+        if confirmed_user:
+            if ctx:
+                print ctx
+                user_id = confirmed_user['id']
+                user_name = confirmed_user['name']
+                start = self.get_iso_timestamp()
+                project_id = ctx.keys()[0]
+                ctx_data = ctx[project_id]
+                project = ctx_data['project']
+                project_jobcode = None
+                task = ctx_data['task']
+                shot_or_asset = ctx_data['name']
+                sequence = ctx_data['sequence']
+                context = ctx_data['context']
+                if context == 'Asset':
+                    ts_folder = 'Assets'
+                elif context == 'Shot':
+                    ts_folder = 'Shots'
+                ts_projects = self.get_ts_active_projects()
+                for pid, proj in ts_projects.items():
+                    if proj == project:
+                        project_jobcode = pid
+                        break
+                if project_jobcode:
+                    ts_proj_subs = self.return_subs(project_jobcode)
+                    if ts_proj_subs:
+                        for folder_id, folder_data in ts_proj_subs.items():
+                            if folder_data['name'] == ts_folder:
+                                if folder_data['has_children']:
+                                    assets_seqs = self.return_subs(folder_id)
+                                    if assets_seqs:
+                                        for ass_seq_id, ass_seq_data in assets_seqs.items():
+                                            if ts_folder == 'Assets':
+                                                if ass_seq_data['name'] == shot_or_asset:
+                                                    jobcode_id = ass_seq_id
+                                                    print 'ASSET JOBCODE ID: %s' % jobcode_id
+                                                    break
+                                            elif ts_folder == 'Shots':
+                                                if ass_seq_data['name'] == sequence:
+                                                    if ass_seq_data['has_children']:
+                                                        get_shots = self.return_subs(ass_seq_id)
+                                                        for shot_id, shot_data in get_shots.items():
+                                                            if shot_data['name'] == shot_or_asset:
+                                                                jobcode_id = shot_id
+                                                                print 'SHOT JOBCODE ID: %s' % jobcode_id
+                                                                break
+                                break
+                    data = {'ids': jobcode_id}
+                    get_jobcode = self._return_from_tsheets(page='jobcodes', data=data)
+                    parse_data = get_jobcode['supplemental_data']
+                    jobcodes = parse_data['jobcodes']
+                    results = get_jobcode['results']['jobcodes']
+                    for parent_ids, info in jobcodes.items():
+                        if info['name'] == project:
+                            ts_project = {'project_id': parent_ids, 'project_name': project}
+                        elif info['name'] == context:
+                            ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
+                    get_task_data = self._return_from_tsheets(page='customfields')
+                    tasks = get_task_data['results']['customfields']
+                    print tasks
+                    task_id = 0
+                    for t, d in tasks.items():
+                        if d['name'] == 'Job Tasks':
+                            task_id = t
+                            break
+                    sg_to_ts_translation = self.get_sg_translator(sg_task=task)
+                    task_translation = sg_to_ts_translation['task']
+                    print task_translation
+                    print self.get_iso_timestamp()
+                    print jobcode_id
+                    new_ts_data = {
+                        "data":
+                            [
+                                {
+                                    "user_id": user_id,
+                                    "type": "regular",
+                                    "start": "%s" % self.get_iso_timestamp(),
+                                    "end": "",
+                                    "jobcode_id": "%s" % jobcode_id,
+                                    "notes": "Automatic timesheet update through Shotgun",
+                                    "customfields": {
+                                        task_id: "%s" % task_translation
+                                    }
+                                }
+                            ]
+                    }
+                    new_ts = self._send_to_tsheets(page='timesheets', data=new_ts_data)
+        print 'New Timesheet: %s' % new_ts
+        return new_ts
+
     def get_ts_project_from_sg(self, project_name=None):
         project_info = {}
         if project_name:
@@ -509,6 +609,7 @@ class AppDialog(QtGui.QWidget):
         return ts_projects
 
     def get_ts_jobtasks(self, task_id=None):
+        # Not Currently used
         task_info = {}
         if task_id:
             data = {
@@ -536,11 +637,10 @@ class AppDialog(QtGui.QWidget):
                     job_data = get_jobcode[keys]['jobcodes']
                     for job_id, job_info in job_data.items():
                         jobid = job_id
-                        job_tasks = job_info['filtered_customfielditems'].keys()[1]
                         job_name = job_info['name']
                         has_children = job_info['has_children']
                         parent_id = job_info['parent_id']
-                        jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
+                        jobcode_data[jobid] = {'name': job_name, 'has_children': has_children,
                                                'parent_id': parent_id}
         return jobcode_data
 

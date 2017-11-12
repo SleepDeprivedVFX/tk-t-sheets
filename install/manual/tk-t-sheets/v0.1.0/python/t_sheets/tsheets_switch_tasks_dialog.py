@@ -63,7 +63,7 @@ def show_dialog(app_instance):
     # in order to handle UIs seamlessly, each toolkit engine has methods for launching
     # different types of windows. By using these methods, your windows will be correctly
     # decorated and handled in a consistent fashion by the system. 
-    
+
     # we pass the dialog class to this method and leave the actual construction
     # to be carried out by toolkit.
     app_instance.engine.show_dialog("T-Sheets Connect", app_instance, AppDialog)
@@ -73,7 +73,7 @@ class AppDialog(QtGui.QWidget):
     """
     Main application dialog window
     """
-    
+
     def __init__(self, timesheet_id=None, jobcode_id=None):
         """
         Constructor
@@ -82,9 +82,9 @@ class AppDialog(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
 
         # now load in the UI that was created in the UI designer
-        self.ui = Ui_Dialog() 
+        self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        
+
         # most of the useful accessors are available through the Application class instance
         # it is often handy to keep a reference to this. You can get it via the following method:
         self._app = sgtk.platform.current_bundle()
@@ -92,7 +92,7 @@ class AppDialog(QtGui.QWidget):
         # via the self._app handle we can for example access:
         # - The engine, via self._app.engine
         # - A Shotgun API instance, via self._app.shotgun
-        # - A tk API instance, via self._app.tk 
+        # - A tk API instance, via self._app.tk
 
         auth_id = 3
         auth_filters = [
@@ -148,7 +148,14 @@ class AppDialog(QtGui.QWidget):
                 ts_project_id = None
                 ts_project_name = None
             setup_ts_name = get_jobcode_data[get_jobcode_data.keys()[0]]['name']
-            ts_task_id = get_jobcode_data[get_jobcode_data.keys()[0]]['tasks']
+
+            get_task_data = self._return_from_tsheets(page='customfields')
+            tasks = get_task_data['results']['customfields']
+            ts_task_id = 0
+            for t, d in tasks.items():
+                if d['name'] == 'Job Tasks':
+                    ts_task_id = t
+                    break
             ts_task = setup_timecard['customfields'][ts_task_id]
             self.ui.current_project.setText(ts_project_name)
             self.ui.current_entity_label.setText(setup_ts_name)
@@ -245,7 +252,7 @@ class AppDialog(QtGui.QWidget):
             if data:
                 try:
                     packed_data = json.dumps(data)
-                    request = self.requests.post('%s%s' % (url, page), headers=self.headers, data=packed_data)
+                    request = urllib2.Request('%s%s' % (url, page), headers=self.headers, data=packed_data)
                     request.add_header('Content-Type', 'application/json')
                     response = urllib2.urlopen(request)
                     response_data = json.loads(response.read())
@@ -259,17 +266,19 @@ class AppDialog(QtGui.QWidget):
 
     def _return_from_tsheets(self, page=None, data=None):
         if page:
-            if data:
-                try:
+            try:
+                if data:
                     data_list = urllib.urlencode(data)
-                    request = urllib2.Request('%s%s?%s' % (url, page, data_list), headers=self.headers)
-                    response = urllib2.urlopen(request)
-                    response_data = json.loads(response.read())
-                    return response_data
-                except Exception, e:
-                    print 'SWITCH: Return from T-Sheets Connection Failed!  Error: %s' % e
-            else:
-                return False
+                    Q = '?'
+                else:
+                    data_list = ''
+                    Q = ''
+                request = urllib2.Request('%s%s%s%s' % (url, page, Q, data_list), headers=self.headers)
+                response = urllib2.urlopen(request)
+                response_data = json.loads(response.read())
+                return response_data
+            except Exception, e:
+                print 'SWITCH: Return from T-Sheets Connection Failed!  Error: %s' % e
         else:
             return False
 
@@ -424,12 +433,10 @@ class AppDialog(QtGui.QWidget):
                     job_data = get_jobcode[keys]['jobcodes']
                     for job_id, job_info in job_data.items():
                         jobid = job_id
-                        job_tasks = job_info['filtered_customfielditems'].keys()
-                        job_tasks = job_tasks[-1]
                         job_name = job_info['name']
                         has_children = job_info['has_children']
                         parent_id = job_info['parent_id']
-                        jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
+                        jobcode_data[jobid] = {'name': job_name, 'has_children': has_children,
                                                'parent_id': parent_id}
         return jobcode_data
 
@@ -591,6 +598,7 @@ class AppDialog(QtGui.QWidget):
             if ctx:
                 print ctx
                 user_id = confirmed_user['id']
+                user_name = confirmed_user['name']
                 start = self.get_iso_timestamp()
                 project_id = ctx.keys()[0]
                 ctx_data = ctx[project_id]
@@ -633,13 +641,6 @@ class AppDialog(QtGui.QWidget):
                                                                 print 'SHOT JOBCODE ID: %s' % jobcode_id
                                                                 break
                                 break
-                    # WRONG!!!
-                    # jobcode_data = self.get_ts_jobcode(jobcode_id)
-                    # print jobcode_data
-                    # task_id = jobcode_data[jobcode_data.keys()[0]]['tasks']
-                    # print task_id
-                    # get_task = self.get_ts_jobtasks(task_id=task_id)
-                    # END WRONG
                     data = {'ids': jobcode_id}
                     get_jobcode = self._return_from_tsheets(page='jobcodes', data=data)
                     parse_data = get_jobcode['supplemental_data']
@@ -650,26 +651,37 @@ class AppDialog(QtGui.QWidget):
                             ts_project = {'project_id': parent_ids, 'project_name': project}
                         elif info['name'] == context:
                             ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
-                    jobcode_data = results[jobcode_id]
-                    jobcode_name = jobcode_data['name']
+                    get_task_data = self._return_from_tsheets(page='customfields')
+                    tasks = get_task_data['results']['customfields']
+                    print tasks
+                    task_id = 0
+                    for t, d in tasks.items():
+                        if d['name'] == 'Job Tasks':
+                            task_id = t
+                            break
                     sg_to_ts_translation = self.get_sg_translator(sg_task=task)
-                    print 'Jobcode test:'
-                    print jobcode_name
-                    print sg_to_ts_translation
                     task_translation = sg_to_ts_translation['task']
-                    task_groups = sg_to_ts_translation['group']
-                    task_people = sg_to_ts_translation['people']
-                    task_short_code = sg_to_ts_translation['short']
-                    people = {}
-                    if task_people:
-                        print 'override people'
-                    else:
-                        if task_groups:
-                            for group in task_groups:
-                                group_id = group['id']
-                                group_name = group['name']
-                                people_in_group = self.get_people_from_group(group_id=group_id, group_name=group_name)
-                                print people_in_group
+                    print task_translation
+                    print self.get_iso_timestamp()
+                    print jobcode_id
+                    new_ts_data = {
+                        "data":
+                            [
+                                {
+                                    "user_id": user_id,
+                                    "type": "regular",
+                                    "start": "%s" % self.get_iso_timestamp(),
+                                    "end": "",
+                                    "jobcode_id": "%s" % jobcode_id,
+                                    "notes": "Automatic timesheet update through Shotgun",
+                                    "customfields": {
+                                        task_id: "%s" % task_translation
+                                    }
+                                }
+                            ]
+                    }
+                    new_ts = self._send_to_tsheets(page='timesheets', data=new_ts_data)
+        print 'New Timesheet: %s' % new_ts
         return new_ts
 
     def get_people_from_group(self, group_id=None, group_name=None):
@@ -684,17 +696,15 @@ class AppDialog(QtGui.QWidget):
             fields = [
                 'users'
             ]
-            group_people = self.sg.shotgun.find('Groups', filters, fields)
+            group_people = self.sg.shotgun.find('Group', filters, fields)
             if group_people:
-                people = group_people['users']
-
+                people = group_people[0]['users']
         return people
 
     def clock_out_ts_timesheet(self, timesheet_id=None, jobcode_id=None, *args):
         confirm_user = self.confirm_user()
         user_email = confirm_user['username']
         clocked_out = False
-        current_timesheet = self.get_ts_user_timesheet(email=user_email)
         if confirm_user:
             clock_out = self.get_iso_timestamp()
             data = {
@@ -708,7 +718,6 @@ class AppDialog(QtGui.QWidget):
                     ]
             }
             success = self._edit_tsheets(page='timesheets', data=data)
-            print success
             if success:
                 if success['results']['timesheets']['1']['_status_message'] == 'Updated':
                     clocked_out = True
@@ -765,4 +774,3 @@ class AppDialog(QtGui.QWidget):
                 people = translation_data['sg_people_override']
                 translation = {'task': task, 'short': short, 'group': group, 'people': people}
         return translation
-

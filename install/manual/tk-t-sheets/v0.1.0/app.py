@@ -271,6 +271,7 @@ class t_sheets_connect(Application):
         return False
 
     def get_ts_jobtasks(self, task_id=None):
+        # NOT CURRENTLY USED
         task_info = {}
         if task_id:
             data = {
@@ -340,12 +341,10 @@ class t_sheets_connect(Application):
                     job_data = get_jobcode[keys]['jobcodes']
                     for job_id, job_info in job_data.items():
                         jobid = job_id
-                        job_tasks = job_info['filtered_customfielditems'].keys()
-                        job_tasks = job_tasks[-1]
                         job_name = job_info['name']
                         has_children = job_info['has_children']
                         parent_id = job_info['parent_id']
-                        jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
+                        jobcode_data[jobid] = {'name': job_name, 'has_children': has_children,
                                                'parent_id': parent_id}
         return jobcode_data
 
@@ -787,7 +786,14 @@ class t_sheets_connect(Application):
                 ctx_name = context[context.keys()[0]]['name']
                 ctx_task = context[context.keys()[0]]['task']
                 ts_name = jobcode_data[jobcode_data.keys()[0]]['name']
-                ts_task = jobcode_data[jobcode_data.keys()[0]]['tasks']
+
+                get_task_data = self._return_from_tsheets(page='customfields')
+                tasks = get_task_data['results']['customfields']
+                ts_task = 0
+                for t, d in tasks.items():
+                    if d['name'] == 'Job Tasks':
+                        ts_task = t
+                        break
                 ts_job_task = timesheet_data['timecard']['customfields'][ts_task]
                 tran_task = self.get_sg_translator(sg_task=ctx_task)['task']
                 if ctx_name == ts_name:
@@ -836,6 +842,7 @@ class t_sheets_connect(Application):
             if ctx:
                 print ctx
                 user_id = confirmed_user['id']
+                user_name = confirmed_user['name']
                 start = self.get_iso_timestamp()
                 project_id = ctx.keys()[0]
                 ctx_data = ctx[project_id]
@@ -866,6 +873,7 @@ class t_sheets_connect(Application):
                                             if ts_folder == 'Assets':
                                                 if ass_seq_data['name'] == shot_or_asset:
                                                     jobcode_id = ass_seq_id
+                                                    print 'ASSET JOBCODE ID: %s' % jobcode_id
                                                     break
                                             elif ts_folder == 'Shots':
                                                 if ass_seq_data['name'] == sequence:
@@ -874,13 +882,50 @@ class t_sheets_connect(Application):
                                                         for shot_id, shot_data in get_shots.items():
                                                             if shot_data['name'] == shot_or_asset:
                                                                 jobcode_id = shot_id
+                                                                print 'SHOT JOBCODE ID: %s' % jobcode_id
                                                                 break
                                 break
-                    jobcode_data = self.get_ts_jobcode(jobcode_id)
-                    print jobcode_data
-                    task_id = jobcode_data[jobcode_data.keys()[0]]['tasks']
-                    print task_id
-                    get_task = self.get_ts_jobtasks(task_id=task_id)
+                    data = {'ids': jobcode_id}
+                    get_jobcode = self._return_from_tsheets(page='jobcodes', data=data)
+                    parse_data = get_jobcode['supplemental_data']
+                    jobcodes = parse_data['jobcodes']
+                    results = get_jobcode['results']['jobcodes']
+                    for parent_ids, info in jobcodes.items():
+                        if info['name'] == project:
+                            ts_project = {'project_id': parent_ids, 'project_name': project}
+                        elif info['name'] == context:
+                            ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
+                    get_task_data = self._return_from_tsheets(page='customfields')
+                    tasks = get_task_data['results']['customfields']
+                    print tasks
+                    task_id = 0
+                    for t, d in tasks.items():
+                        if d['name'] == 'Job Tasks':
+                            task_id = t
+                            break
+                    sg_to_ts_translation = self.get_sg_translator(sg_task=task)
+                    task_translation = sg_to_ts_translation['task']
+                    print task_translation
+                    print self.get_iso_timestamp()
+                    print jobcode_id
+                    new_ts_data = {
+                        "data":
+                            [
+                                {
+                                    "user_id": user_id,
+                                    "type": "regular",
+                                    "start": "%s" % self.get_iso_timestamp(),
+                                    "end": "",
+                                    "jobcode_id": "%s" % jobcode_id,
+                                    "notes": "Automatic timesheet update through Shotgun",
+                                    "customfields": {
+                                        task_id: "%s" % task_translation
+                                    }
+                                }
+                            ]
+                    }
+                    new_ts = self._send_to_tsheets(page='timesheets', data=new_ts_data)
+        print 'New Timesheet: %s' % new_ts
         return new_ts
 
     def clock_out_ts_timesheet(self, timesheet_id=None, jobcode_id=None):
