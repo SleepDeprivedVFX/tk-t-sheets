@@ -110,17 +110,19 @@ class t_sheets_connect(Application):
 
     def _return_from_tsheets(self, page=None, data=None):
         if page:
-            if data:
-                try:
+            try:
+                if data:
                     data_list = urllib.urlencode(data)
-                    request = urllib2.Request('%s%s?%s' % (url, page, data_list), headers=self.headers)
-                    response = urllib2.urlopen(request)
-                    response_data = json.loads(response.read())
-                    return response_data
-                except Exception, e:
-                    print 'APP: Return from T-Sheets Connection Failed!  Error: %s' % e
-            else:
-                return False
+                    Q = '?'
+                else:
+                    data_list = ''
+                    Q = ''
+                request = urllib2.Request('%s%s%s%s' % (url, page, Q, data_list), headers=self.headers)
+                response = urllib2.urlopen(request)
+                response_data = json.loads(response.read())
+                return response_data
+            except Exception, e:
+                print 'SWITCH: Return from T-Sheets Connection Failed!  Error: %s' % e
         else:
             return False
 
@@ -978,33 +980,24 @@ class t_sheets_connect(Application):
         :return:
         """
         context = {}
-        try:
-            tk = sgtk
-            engine = tk.platform.current_engine()
-            ctx = engine.context
-            task_name = ctx.task['name']
-            task_id = ctx.task['id']
-            project = ctx.project['name']
-            project_id = ctx.project['id']
-            shot_id = ctx.entity['id']
-            shot = ctx.entity['name']
-            entity_type = ctx.entity['type']
-            if entity_type == 'Shot':
-                seq_data = self.get_sg_sequence_from_shot_id(shot_id)
-                seq = seq_data['name']
-                seq_id = seq_data['id']
-            else:
-                seq = None
-                seq_id = None
-        except Exception:
-            task_name = 'fx.cloth'
-            task_id = 11278
-            entity_type = 'Shot'
-            project = 'Asura'
-            project_id = 140
-            shot = '125_SAF_0015'
-            seq = '125_SAF'
-            seq_id = 161
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        ctx = engine.context
+        task_name = ctx.task['name']
+        task_id = ctx.task['id']
+        project = ctx.project['name']
+        project_id = ctx.project['id']
+        shot_id = ctx.entity['id']
+        shot = ctx.entity['name']
+        entity_type = ctx.entity['type']
+        if entity_type == 'Shot':
+            seq_data = self.get_sg_sequence_from_shot_id(shot_id)
+            for keys, name in seq_data.items():
+                seq = name
+                seq_id = keys
+        else:
+            seq = None
+            seq_id = None
         context[project_id] = {
             'task': task_name,
             'task_id': task_id,

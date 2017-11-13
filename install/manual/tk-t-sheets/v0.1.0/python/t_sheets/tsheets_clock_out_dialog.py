@@ -260,17 +260,19 @@ class AppDialog(QtGui.QWidget):
 
     def _return_from_tsheets(self, page=None, data=None):
         if page:
-            if data:
-                try:
+            try:
+                if data:
                     data_list = urllib.urlencode(data)
-                    request = urllib2.Request('%s%s?%s' % (url, page, data_list), headers=self.headers)
-                    response = urllib2.urlopen(request)
-                    response_data = json.loads(response.read())
-                    return response_data
-                except Exception, e:
-                    print 'CLOCK OUT: Return from T-Sheets Connection Failed!  Error: %s' % e
-            else:
-                return False
+                    Q = '?'
+                else:
+                    data_list = ''
+                    Q = ''
+                request = urllib2.Request('%s%s%s%s' % (url, page, Q, data_list), headers=self.headers)
+                response = urllib2.urlopen(request)
+                response_data = json.loads(response.read())
+                return response_data
+            except Exception, e:
+                print 'SWITCH: Return from T-Sheets Connection Failed!  Error: %s' % e
         else:
             return False
 

@@ -296,15 +296,7 @@ class AppDialog(QtGui.QWidget):
                     response_data = json.loads(response.read())
                     return response_data
                 except Exception:
-                    # So, I am also trying a different approach using the Requests library instead of the urllib2
-                    try:
-                        packed_data = json.dumps(data)
-                        request = self.requests.put('%s%s' % (url, page), headers=self.headers, data=packed_data)
-                        response_data = request
-                        print response_data
-                        return response_data
-                    except Exception, e:
-                        print 'SWITCH: Edit T-Sheets Connection Failed! Error: %s' % e
+                    print 'SWITCH: Edit T-Sheets Connection Failed! Error: %s' % e
             else:
                 return False
         else:
@@ -469,33 +461,24 @@ class AppDialog(QtGui.QWidget):
         :return:
         """
         context = {}
-        try:
-            tk = sgtk
-            engine = tk.platform.current_engine()
-            ctx = engine.context
-            task_name = ctx.task['name']
-            task_id = ctx.task['id']
-            project = ctx.project['name']
-            project_id = ctx.project['id']
-            shot_id = ctx.entity['id']
-            shot = ctx.entity['name']
-            entity_type = ctx.entity['type']
-            if entity_type == 'Shot':
-                seq_data = self.get_sg_sequence_from_shot_id(shot_id)
-                seq = seq_data['name']
-                seq_id = seq_data['id']
-            else:
-                seq = None
-                seq_id = None
-        except Exception:
-            task_name = 'fx.cloth'
-            task_id = 11278
-            entity_type = 'Shot'
-            project = 'Asura'
-            project_id = 140
-            shot = '125_SAF_0015'
-            seq = '125_SAF'
-            seq_id = 161
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        ctx = engine.context
+        task_name = ctx.task['name']
+        task_id = ctx.task['id']
+        project = ctx.project['name']
+        project_id = ctx.project['id']
+        shot_id = ctx.entity['id']
+        shot = ctx.entity['name']
+        entity_type = ctx.entity['type']
+        if entity_type == 'Shot':
+            seq_data = self.get_sg_sequence_from_shot_id(shot_id)
+            for keys, name in seq_data.items():
+                seq = name
+                seq_id = keys
+        else:
+            seq = None
+            seq_id = None
         context[project_id] = {
             'task': task_name,
             'task_id': task_id,
@@ -507,6 +490,22 @@ class AppDialog(QtGui.QWidget):
             'seq_id': seq_id
         }
         return context
+
+    def get_sg_sequence_from_shot_id(self, shot_id=None):
+        seq = {}
+        if shot_id:
+            filters = [
+                ['id', 'is', shot_id]
+            ]
+            fields = [
+                'sg_sequence'
+            ]
+            find_seq = self.sg.shotgun.find_one('Shot', filters, fields)
+            if find_seq:
+                seq_id = find_seq['sg_sequence']['id']
+                seq_name = find_seq['sg_sequence']['name']
+                seq[seq_id] = seq_name
+        return seq
 
     # ------------------------------------------------------------------------------------------------------------------
     # T-Sheets Timesheet Workers
@@ -653,7 +652,6 @@ class AppDialog(QtGui.QWidget):
                             ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
                     get_task_data = self._return_from_tsheets(page='customfields')
                     tasks = get_task_data['results']['customfields']
-                    print tasks
                     task_id = 0
                     for t, d in tasks.items():
                         if d['name'] == 'Job Tasks':
@@ -661,9 +659,6 @@ class AppDialog(QtGui.QWidget):
                             break
                     sg_to_ts_translation = self.get_sg_translator(sg_task=task)
                     task_translation = sg_to_ts_translation['task']
-                    print task_translation
-                    print self.get_iso_timestamp()
-                    print jobcode_id
                     new_ts_data = {
                         "data":
                             [
@@ -687,8 +682,6 @@ class AppDialog(QtGui.QWidget):
     def get_people_from_group(self, group_id=None, group_name=None):
         people = None
         if group_id and group_name:
-            print group_name
-            print group_id
             filters = [
                 ['id', 'is', group_id],
                 ['code', 'is', group_name]
