@@ -121,7 +121,7 @@ class AppDialog(QtGui.QWidget):
         project_info = context.project
         self.ui.new_project.setText(project_info['name'])
         setup_name = context.user['name']
-        self.ui.employee.setText(setup_name)
+        self.ui.employee_name.setText(setup_name)
         task = context.task['name']
         self.ui.new_task.setText(task)
         shot_asset = context.entity['name']
@@ -295,7 +295,7 @@ class AppDialog(QtGui.QWidget):
                     response = opener.open(request)
                     response_data = json.loads(response.read())
                     return response_data
-                except Exception:
+                except Exception, e:
                     print 'SWITCH: Edit T-Sheets Connection Failed! Error: %s' % e
             else:
                 return False
@@ -677,6 +677,7 @@ class AppDialog(QtGui.QWidget):
                     }
                     new_ts = self._send_to_tsheets(page='timesheets', data=new_ts_data)
         print 'New Timesheet: %s' % new_ts
+        self.no()
         return new_ts
 
     def get_people_from_group(self, group_id=None, group_name=None):
@@ -714,7 +715,6 @@ class AppDialog(QtGui.QWidget):
             if success:
                 if success['results']['timesheets']['1']['_status_message'] == 'Updated':
                     clocked_out = True
-        self.no()
         return clocked_out
 
     def no(self):

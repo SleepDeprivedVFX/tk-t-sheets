@@ -150,7 +150,13 @@ class AppDialog(QtGui.QWidget):
                 ts_project_id = None
                 ts_project_name = None
             setup_ts_name = get_jobcode_data[get_jobcode_data.keys()[0]]['name']
-            ts_task_id = get_jobcode_data[get_jobcode_data.keys()[0]]['tasks']
+            get_task_data = self._return_from_tsheets(page='customfields')
+            tasks = get_task_data['results']['customfields']
+            ts_task_id = 0
+            for t, d in tasks.items():
+                if d['name'] == 'Job Tasks':
+                    ts_task_id = t
+                    break
             ts_task = setup_timecard['customfields'][ts_task_id]
             self.ui.project_name.setText(ts_project_name)
             self.ui.task.setText(ts_task)
@@ -639,10 +645,16 @@ class AppDialog(QtGui.QWidget):
                     job_data = get_jobcode[keys]['jobcodes']
                     for job_id, job_info in job_data.items():
                         jobid = job_id
+                        job_tasks = job_info['filtered_customfielditems']
+                        if job_tasks:
+                            job_task_keys = job_tasks.keys()
+                            job_tasks = job_task_keys[-1]
+                        else:
+                            job_tasks = ''
                         job_name = job_info['name']
                         has_children = job_info['has_children']
                         parent_id = job_info['parent_id']
-                        jobcode_data[jobid] = {'name': job_name, 'has_children': has_children,
+                        jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
                                                'parent_id': parent_id}
         return jobcode_data
 

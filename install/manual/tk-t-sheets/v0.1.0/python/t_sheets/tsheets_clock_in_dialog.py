@@ -140,17 +140,18 @@ class AppDialog(QtGui.QWidget):
             if data:
                 try:
                     packed_data = json.dumps(data)
-                    request = self.requests.post('%s%s' % (url, page), headers=self.headers, data=packed_data)
+                    request = urllib2.Request('%s%s' % (url, page), headers=self.headers, data=packed_data)
                     request.add_header('Content-Type', 'application/json')
                     response = urllib2.urlopen(request)
                     response_data = json.loads(response.read())
                     return response_data
                 except Exception, e:
-                    print 'CLOCK OUT: Send to T-Sheets connection failed!  Error: %s' % e
+                    print 'SWITCH: Send to T-Sheets connection failed!  Error: %s' % e
             else:
                 return False
         else:
             return False
+
 
     def _return_from_tsheets(self, page=None, data=None):
         if page:
@@ -234,6 +235,22 @@ class AppDialog(QtGui.QWidget):
                 if user_name == ts_user:
                     confirmed_user = get_ts_user
         return confirmed_user
+
+    def get_sg_sequence_from_shot_id(self, shot_id=None):
+        seq = {}
+        if shot_id:
+            filters = [
+                ['id', 'is', shot_id]
+            ]
+            fields = [
+                'sg_sequence'
+            ]
+            find_seq = self.sg.shotgun.find_one('Shot', filters, fields)
+            if find_seq:
+                seq_id = find_seq['sg_sequence']['id']
+                seq_name = find_seq['sg_sequence']['name']
+                seq[seq_id] = seq_name
+        return seq
 
     def get_sg_user(self, userid=None, name=None, email=None, sg_login=None, sg_computer=None):
         """
@@ -399,7 +416,6 @@ class AppDialog(QtGui.QWidget):
                                             if ts_folder == 'Assets':
                                                 if ass_seq_data['name'] == shot_or_asset:
                                                     jobcode_id = ass_seq_id
-                                                    print 'ASSET JOBCODE ID: %s' % jobcode_id
                                                     break
                                             elif ts_folder == 'Shots':
                                                 if ass_seq_data['name'] == sequence:
@@ -408,7 +424,6 @@ class AppDialog(QtGui.QWidget):
                                                         for shot_id, shot_data in get_shots.items():
                                                             if shot_data['name'] == shot_or_asset:
                                                                 jobcode_id = shot_id
-                                                                print 'SHOT JOBCODE ID: %s' % jobcode_id
                                                                 break
                                 break
                     data = {'ids': jobcode_id}
@@ -423,7 +438,6 @@ class AppDialog(QtGui.QWidget):
                             ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
                     get_task_data = self._return_from_tsheets(page='customfields')
                     tasks = get_task_data['results']['customfields']
-                    print tasks
                     task_id = 0
                     for t, d in tasks.items():
                         if d['name'] == 'Job Tasks':
@@ -431,9 +445,6 @@ class AppDialog(QtGui.QWidget):
                             break
                     sg_to_ts_translation = self.get_sg_translator(sg_task=task)
                     task_translation = sg_to_ts_translation['task']
-                    print task_translation
-                    print self.get_iso_timestamp()
-                    print jobcode_id
                     new_ts_data = {
                         "data":
                             [
@@ -452,6 +463,7 @@ class AppDialog(QtGui.QWidget):
                     }
                     new_ts = self._send_to_tsheets(page='timesheets', data=new_ts_data)
         print 'New Timesheet: %s' % new_ts
+        self.no()
         return new_ts
 
     def get_ts_project_from_sg(self, project_name=None):
