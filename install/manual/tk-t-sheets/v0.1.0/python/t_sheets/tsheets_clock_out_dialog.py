@@ -125,10 +125,8 @@ class AppDialog(QtGui.QWidget):
         setup_name = context.user['name']
         self.ui.employee.setText(setup_name)
         task = context.task['name']
-        #self.ui.task.setText(task)
         shot_asset = context.entity['name']
         shot_asset_type = context.entity['type']
-        #self.ui.entity.setText(shot_asset)
         setup_email = setup_user['email']
         setup_timesheet = self.get_ts_user_timesheet(email=setup_email)
         self.ui.no_btn.clicked.connect(self.no)
@@ -172,6 +170,17 @@ class AppDialog(QtGui.QWidget):
         else:
             # This should eventually load the Clock_in Script... Not sure how to call that one... Yet
             # Perhaps what I'll do is just have it rewrite the UI a bit to compensate.
+            message = 'You are not clocked in!'
+            question = 'Would you like to Clock In to the Following?'
+            self.ui.statement.setText(message)
+            self.ui.label_2.setText(question)
+            self.ui.project_name.setText(project_info['name'])
+            self.ui.task.setText(task)
+            self.ui.entity.setText(shot_asset)
+            self.ui.start_time.setEnabled(False)
+            self.ui.current_time.setEnabled(False)
+            self.ui.total_time.setEnabled(False)
+            self.ui.yes_btn.clicked.connect(partial(self.clock_in_ts_timesheet, ctx=self.get_sg_current_context()))
             return
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -536,7 +545,6 @@ class AppDialog(QtGui.QWidget):
                                             if ts_folder == 'Assets':
                                                 if ass_seq_data['name'] == shot_or_asset:
                                                     jobcode_id = ass_seq_id
-                                                    print 'ASSET JOBCODE ID: %s' % jobcode_id
                                                     break
                                             elif ts_folder == 'Shots':
                                                 if ass_seq_data['name'] == sequence:
@@ -545,7 +553,6 @@ class AppDialog(QtGui.QWidget):
                                                         for shot_id, shot_data in get_shots.items():
                                                             if shot_data['name'] == shot_or_asset:
                                                                 jobcode_id = shot_id
-                                                                print 'SHOT JOBCODE ID: %s' % jobcode_id
                                                                 break
                                 break
                     data = {'ids': jobcode_id}
@@ -560,7 +567,6 @@ class AppDialog(QtGui.QWidget):
                             ts_context = {'context_id': parent_ids, 'shot_or_asset_name': context}
                     get_task_data = self._return_from_tsheets(page='customfields')
                     tasks = get_task_data['results']['customfields']
-                    print tasks
                     task_id = 0
                     for t, d in tasks.items():
                         if d['name'] == 'Job Tasks':
@@ -568,9 +574,6 @@ class AppDialog(QtGui.QWidget):
                             break
                     sg_to_ts_translation = self.get_sg_translator(sg_task=task)
                     task_translation = sg_to_ts_translation['task']
-                    print task_translation
-                    print self.get_iso_timestamp()
-                    print jobcode_id
                     new_ts_data = {
                         "data":
                             [
@@ -657,6 +660,55 @@ class AppDialog(QtGui.QWidget):
                         jobcode_data[jobid] = {'tasks': job_tasks, 'name': job_name, 'has_children': has_children,
                                                'parent_id': parent_id}
         return jobcode_data
+
+    def get_sg_current_context(self):
+        """
+        import sgtk
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        sg = engine.sgtk
+        ctx = engine.context
+        taskName = str(ctx).split(',')[0]
+        project = ctx.project['name']
+        entity = ctx.entity['type']
+        print project, entity, taskName
+        print ctx
+
+        masterTemplate Shot anim.main
+        anim.main, Shot MST110_029_370_cmp
+
+        :return:
+        """
+        context = {}
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        ctx = engine.context
+        task_name = ctx.task['name']
+        task_id = ctx.task['id']
+        project = ctx.project['name']
+        project_id = ctx.project['id']
+        shot_id = ctx.entity['id']
+        shot = ctx.entity['name']
+        entity_type = ctx.entity['type']
+        if entity_type == 'Shot':
+            seq_data = self.get_sg_sequence_from_shot_id(shot_id)
+            for keys, name in seq_data.items():
+                seq = name
+                seq_id = keys
+        else:
+            seq = None
+            seq_id = None
+        context[project_id] = {
+            'task': task_name,
+            'task_id': task_id,
+            'context': entity_type,
+            'name': shot,
+            'shot_id': shot_id,
+            'project': project,
+            'sequence': seq,
+            'seq_id': seq_id
+        }
+        return context
 
     def no(self):
         self.close()
