@@ -172,6 +172,13 @@ class AppDialog(QtGui.QWidget):
             # Perhaps what I'll do is just have it rewrite the UI a bit to compensate.
             message = 'You are not clocked in!'
             question = 'Would you like to Clock In to the Following?'
+            self.ui.start_time.hide()
+            self.ui.current_time.hide()
+            self.ui.status_grp.hide()
+            self.ui.total_time.hide()
+            self.ui.total_time_label.hide()
+            self.ui.start_time_label.hide()
+            self.ui.current_time_label.hide()
             self.ui.statement.setText(message)
             self.ui.label_2.setText(question)
             self.ui.project_name.setText(project_info['name'])

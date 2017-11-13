@@ -197,6 +197,7 @@
       <widget class="QPushButton" name="yes_btn">
        <property name="styleSheet">
         <string notr="true">background-color: rgb(0, 255, 0);
+color: rgb(0, 0, 0);
 font: 75 10pt &quot;Arial&quot;;</string>
        </property>
        <property name="text">
@@ -206,8 +207,12 @@ font: 75 10pt &quot;Arial&quot;;</string>
      </item>
      <item>
       <widget class="QPushButton" name="no_btn">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 0, 0);</string>
+        <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>No</string>
