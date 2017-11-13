@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '\\hal\tools\shotgun\mastertemplate_clone\install\manual\tk-t-sheets\v0.1.0\resources\clock_out_dialog.ui'
+# Form implementation generated from reading ui file
+# 'C:\Users\Adam\OneDrive\Documents\Scripts\Python\Shotgun\tk-t-sheets\tk-t-sheets\install\manual\tk-t-sheets\
+# v0.1.0\resources\clock_out_dialog.ui'
 #
-# Created: Wed Nov 08 17:13:47 2017
+# Created: Sun Nov 12 19:03:46 2017
 #      by: pyside-uic 0.2.14 running on PySide 1.2.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +14,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(402, 335)
+        Dialog.resize(612, 458)
         self.verticalLayout_6 = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.verticalLayout = QtGui.QVBoxLayout()
@@ -53,7 +55,6 @@ class Ui_Dialog(object):
         self.current_time_label.setObjectName("current_time_label")
         self.verticalLayout_3.addWidget(self.current_time_label)
         self.current_time = QtGui.QDateTimeEdit(Dialog)
-        self.current_time.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.current_time.setObjectName("current_time")
         self.verticalLayout_3.addWidget(self.current_time)
         self.horizontalLayout.addLayout(self.verticalLayout_3)
@@ -64,7 +65,6 @@ class Ui_Dialog(object):
         self.verticalLayout_4.addWidget(self.total_time_label)
         self.total_time = QtGui.QTimeEdit(Dialog)
         self.total_time.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.total_time.setDisplayFormat('h:mm:ss')
         self.total_time.setObjectName("total_time")
         self.verticalLayout_4.addWidget(self.total_time)
         self.horizontalLayout.addLayout(self.verticalLayout_4)
@@ -73,7 +73,7 @@ class Ui_Dialog(object):
         self.status_grp.setStyleSheet("font: 75 10pt \"Arial\";")
         self.status_grp.setObjectName("status_grp")
         self.layoutWidget = QtGui.QWidget(self.status_grp)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 20, 291, 22))
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 30, 291, 29))
         self.layoutWidget.setObjectName("layoutWidget")
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.layoutWidget)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -99,9 +99,11 @@ class Ui_Dialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.yes_btn = QtGui.QPushButton(Dialog)
+        self.yes_btn.setStyleSheet("background-color: rgb(0, 255, 0);font: 75 10pt \"Arial\";")
         self.yes_btn.setObjectName("yes_btn")
         self.horizontalLayout_3.addWidget(self.yes_btn)
         self.no_btn = QtGui.QPushButton(Dialog)
+        self.no_btn.setStyleSheet("background-color: rgb(255, 0, 0);")
         self.no_btn.setObjectName("no_btn")
         self.horizontalLayout_3.addWidget(self.no_btn)
         self.verticalLayout_6.addLayout(self.horizontalLayout_3)
@@ -111,8 +113,7 @@ class Ui_Dialog(object):
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
         Dialog.setTabOrder(self.start_time, self.current_time)
-        Dialog.setTabOrder(self.current_time, self.in_progress)
-        Dialog.setTabOrder(self.in_progress, self.complete)
+        Dialog.setTabOrder(self.current_time, self.complete)
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
@@ -124,7 +125,8 @@ class Ui_Dialog(object):
         self.start_time_label.setText(QtGui.QApplication.translate("Dialog", "Start Time", None, QtGui.QApplication.UnicodeUTF8))
         self.current_time_label.setText(QtGui.QApplication.translate("Dialog", "Current Time", None, QtGui.QApplication.UnicodeUTF8))
         self.total_time_label.setText(QtGui.QApplication.translate("Dialog", "Total Time (hours)", None, QtGui.QApplication.UnicodeUTF8))
-        self.status_grp.setTitle(QtGui.QApplication.translate("Dialog", "Still working on this?", None, QtGui.QApplication.UnicodeUTF8))
+        self.total_time.setDisplayFormat(QtGui.QApplication.translate("Dialog", "h:mm:ss", None, QtGui.QApplication.UnicodeUTF8))
+        self.status_grp.setTitle(QtGui.QApplication.translate("Dialog", "Are you done with this task?", None, QtGui.QApplication.UnicodeUTF8))
         self.in_progress.setText(QtGui.QApplication.translate("Dialog", "In Progress", None, QtGui.QApplication.UnicodeUTF8))
         self.complete.setText(QtGui.QApplication.translate("Dialog", "Complete", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Dialog", "Would you Like to Clock Out?", None, QtGui.QApplication.UnicodeUTF8))

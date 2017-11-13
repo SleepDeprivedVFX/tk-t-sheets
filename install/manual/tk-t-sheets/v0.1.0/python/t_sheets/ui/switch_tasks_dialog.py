@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '\\hal\tools\shotgun\mastertemplate_clone\install\manual\tk-t-sheets\v0.1.0\resources\switch_tasks_dialog.ui'
+# Form implementation generated from reading ui file
+# 'C:\Users\Adam\OneDrive\Documents\Scripts\Python\Shotgun\tk-t-sheets\tk-t-sheets\install\manual\tk-t-sheets\
+# v0.1.0\resources\switch_tasks_dialog.ui'
 #
-# Created: Wed Nov 08 17:15:19 2017
+# Created: Sun Nov 12 19:04:15 2017
 #      by: pyside-uic 0.2.14 running on PySide 1.2.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,15 +14,17 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(410, 335)
+        Dialog.resize(685, 525)
+        Dialog.setSizeGripEnabled(False)
+        Dialog.setModal(False)
         self.verticalLayout_6 = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.employee = QtGui.QLabel(Dialog)
-        self.employee.setStyleSheet("font: 75 14pt \"Arial\";")
-        self.employee.setObjectName("employee")
-        self.verticalLayout_3.addWidget(self.employee)
+        self.employee_name = QtGui.QLabel(Dialog)
+        self.employee_name.setStyleSheet("font: 75 14pt \"Arial\";")
+        self.employee_name.setObjectName("employee_name")
+        self.verticalLayout_3.addWidget(self.employee_name)
         self.statement = QtGui.QLabel(Dialog)
         self.statement.setStyleSheet("font: 75 10pt \"Arial\";")
         self.statement.setObjectName("statement")
@@ -56,7 +60,6 @@ class Ui_Dialog(object):
         self.current_time_label.setObjectName("current_time_label")
         self.verticalLayout_2.addWidget(self.current_time_label)
         self.current_time = QtGui.QDateTimeEdit(Dialog)
-        self.current_time.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.current_time.setObjectName("current_time")
         self.verticalLayout_2.addWidget(self.current_time)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
@@ -67,17 +70,35 @@ class Ui_Dialog(object):
         self.verticalLayout_5.addWidget(self.label)
         self.total_time = QtGui.QTimeEdit(Dialog)
         self.total_time.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.total_time.setDisplayFormat('h:mm:ss')
         self.total_time.setObjectName("total_time")
         self.verticalLayout_5.addWidget(self.total_time)
         self.horizontalLayout.addLayout(self.verticalLayout_5)
         self.verticalLayout_6.addLayout(self.horizontalLayout)
+        self.groupBox = QtGui.QGroupBox(Dialog)
+        self.groupBox.setMinimumSize(QtCore.QSize(0, 71))
+        self.groupBox.setStyleSheet("font: 75 10pt \"Arial\";")
+        self.groupBox.setObjectName("groupBox")
+        self.widget = QtGui.QWidget(self.groupBox)
+        self.widget.setGeometry(QtCore.QRect(10, 30, 266, 29))
+        self.widget.setObjectName("widget")
+        self.horizontalLayout_3 = QtGui.QHBoxLayout(self.widget)
+        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.in_progress = QtGui.QRadioButton(self.widget)
+        self.in_progress.setChecked(True)
+        self.in_progress.setObjectName("in_progress")
+        self.horizontalLayout_3.addWidget(self.in_progress)
+        self.complete = QtGui.QRadioButton(self.widget)
+        self.complete.setObjectName("complete")
+        self.horizontalLayout_3.addWidget(self.complete)
+        self.verticalLayout_6.addWidget(self.groupBox)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_6.addItem(spacerItem)
         self.verticalLayout_4 = QtGui.QVBoxLayout()
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.Question = QtGui.QLabel(Dialog)
-        self.Question.setStyleSheet("font: 75 14pt \"Arial\";\n")
+        self.Question.setStyleSheet("font: 75 14pt \"Arial\";\n"
+"")
         self.Question.setObjectName("Question")
         self.verticalLayout_4.addWidget(self.Question)
         self.new_project = QtGui.QLabel(Dialog)
@@ -96,9 +117,11 @@ class Ui_Dialog(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.yes_btn = QtGui.QPushButton(Dialog)
+        self.yes_btn.setStyleSheet("background-color: rgb(0, 255, 0);font: 75 10pt \"Arial\";")
         self.yes_btn.setObjectName("yes_btn")
         self.horizontalLayout_2.addWidget(self.yes_btn)
         self.no_btn = QtGui.QPushButton(Dialog)
+        self.no_btn.setStyleSheet("background-color: rgb(255, 0, 0);")
         self.no_btn.setObjectName("no_btn")
         self.horizontalLayout_2.addWidget(self.no_btn)
         self.verticalLayout_6.addLayout(self.horizontalLayout_2)
@@ -110,7 +133,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
-        self.employee.setText(QtGui.QApplication.translate("Dialog", "Employee Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.employee_name.setText(QtGui.QApplication.translate("Dialog", "Employee Name", None, QtGui.QApplication.UnicodeUTF8))
         self.statement.setText(QtGui.QApplication.translate("Dialog", "You are currently clocked in to:", None, QtGui.QApplication.UnicodeUTF8))
         self.current_project.setText(QtGui.QApplication.translate("Dialog", "Project Name", None, QtGui.QApplication.UnicodeUTF8))
         self.current_entity_label.setText(QtGui.QApplication.translate("Dialog", "Asset / Shot", None, QtGui.QApplication.UnicodeUTF8))
@@ -118,6 +141,10 @@ class Ui_Dialog(object):
         self.start_time_label.setText(QtGui.QApplication.translate("Dialog", "Start Time", None, QtGui.QApplication.UnicodeUTF8))
         self.current_time_label.setText(QtGui.QApplication.translate("Dialog", "Current Time", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Dialog", "Total Time (hours)", None, QtGui.QApplication.UnicodeUTF8))
+        self.total_time.setDisplayFormat(QtGui.QApplication.translate("Dialog", "h:mm:ss", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox.setTitle(QtGui.QApplication.translate("Dialog", "Done with the previous task?", None, QtGui.QApplication.UnicodeUTF8))
+        self.in_progress.setText(QtGui.QApplication.translate("Dialog", "In Progress", None, QtGui.QApplication.UnicodeUTF8))
+        self.complete.setText(QtGui.QApplication.translate("Dialog", "Complete", None, QtGui.QApplication.UnicodeUTF8))
         self.Question.setText(QtGui.QApplication.translate("Dialog", "Update your time sheet to the new task?", None, QtGui.QApplication.UnicodeUTF8))
         self.new_project.setText(QtGui.QApplication.translate("Dialog", "New Project Name", None, QtGui.QApplication.UnicodeUTF8))
         self.new_entity.setText(QtGui.QApplication.translate("Dialog", "New Asset / Shot", None, QtGui.QApplication.UnicodeUTF8))
