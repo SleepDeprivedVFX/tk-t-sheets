@@ -10,3 +10,4 @@
 
 from . import tsheets_clock_out_dialog
 from . import tsheets_switch_tasks_dialog
+from . import tsheets_clock_in_dialog

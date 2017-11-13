@@ -811,7 +811,7 @@ class t_sheets_connect(Application):
                     # self.change_ts_timesheet(timesheet_id=timesheet_id, ctx=context, jobcode_id=jobcode)
             else:
                 # This will actually need to go into the User Interface before calling
-                self.clock_in_ts_timesheet(ctx=context)
+                self.ts_clock_out_payload.tsheets_clock_in_dialog.show_dialog(self)
 
     def change_ts_timesheet(self, timesheet_id=None, ctx=None, jobcode_id=None):
         new_ts = {}

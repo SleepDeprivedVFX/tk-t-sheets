@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
-    <height>335</height>
+    <width>612</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,15 +109,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label">
-         <property name="styleSheet">
-          <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
+        <widget class="QTimeEdit" name="total_time">
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
-         <property name="text">
-          <string>1.5</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <property name="displayFormat">
+          <string>h:mm:ss</string>
          </property>
         </widget>
        </item>
@@ -131,15 +128,15 @@
       <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
      </property>
      <property name="title">
-      <string>Still working on this?</string>
+      <string>Are you done with this task?</string>
      </property>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>20</y>
+        <y>30</y>
         <width>291</width>
-        <height>22</height>
+        <height>29</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -198,6 +195,10 @@
      </item>
      <item>
       <widget class="QPushButton" name="yes_btn">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(0, 255, 0);
+font: 75 10pt &quot;Arial&quot;;</string>
+       </property>
        <property name="text">
         <string>Yes</string>
        </property>
@@ -205,6 +206,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="no_btn">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 0, 0);</string>
+       </property>
        <property name="text">
         <string>No</string>
        </property>
@@ -217,7 +221,6 @@
  <tabstops>
   <tabstop>start_time</tabstop>
   <tabstop>current_time</tabstop>
-  <tabstop>in_progress</tabstop>
   <tabstop>complete</tabstop>
  </tabstops>
  <resources/>

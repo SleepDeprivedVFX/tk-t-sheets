@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>335</height>
+    <width>685</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -124,21 +124,63 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_2">
-         <property name="styleSheet">
-          <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
+        <widget class="QTimeEdit" name="total_time">
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
-         <property name="text">
-          <string>1.5</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <property name="displayFormat">
+          <string>h:mm:ss</string>
          </property>
         </widget>
        </item>
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>71</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
+     </property>
+     <property name="title">
+      <string>Done with the previous task?</string>
+     </property>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>266</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QRadioButton" name="in_progress">
+         <property name="text">
+          <string>In Progress</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="complete">
+         <property name="text">
+          <string>Complete</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
@@ -209,6 +251,10 @@
      </item>
      <item>
       <widget class="QPushButton" name="yes_btn">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(0, 255, 0);
+font: 75 10pt &quot;Arial&quot;;</string>
+       </property>
        <property name="text">
         <string>Yes</string>
        </property>
@@ -216,6 +262,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="no_btn">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 0, 0);</string>
+       </property>
        <property name="text">
         <string>No</string>
        </property>

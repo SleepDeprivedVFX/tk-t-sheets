@@ -130,81 +130,7 @@ class AppDialog(QtGui.QWidget):
         self.ui.current_project.setText(projectname)
         self.ui.current_task_label.setText(task)
         self.ui.current_entity_label.setText(shot_asset)
-        self.ui.yes_btn_2.clicked.connect(partial(self.clock_in_ts_timesheet, ctx=))
-        else:
-            # This should eventually load the Clock_in Script... Not sure how to call that one... Yet
-            # Perhaps what I'll do is just have it rewrite the UI a bit to compensate.
-            return
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Clock Functions
-    # ------------------------------------------------------------------------------------------------------------------
-    def loop_generator(self, pass_time=None):
-        now_date = str(datetime.date(datetime.now()))
-        now_time = str(datetime.time(datetime.now()))
-        split_date = now_date.split('-')
-        split_time = now_time.split(':')
-        Y = int(split_date[0])
-        M = int(split_date[1])
-        D = int(split_date[2])
-        h = int(split_time[0])
-        m = int(split_time[1])
-        get_s = split_time[2].split('.')[0]
-        s = int(get_s)
-
-        while self._generator:
-            if s < 59:
-                s += 1
-            else:
-                if m < 59:
-                    s = 0
-                    m += 1
-                elif m == 59 and h <= 22:
-                    h += 1
-                    m = 0
-                    s = 0
-            set_datetime = QtCore.QDateTime(Y, M, D, h, m, s)
-            self.ui.current_time.setDateTime(set_datetime)
-            if pass_time:
-                split_start = pass_time.replace('T', ' ')
-                split_start = split_start.rsplit('-', 1)[0]
-                split_end = self.get_iso_timestamp().replace('T', ' ').rsplit('-', 1)[0]
-                time_delta = datetime.strptime(split_end, '%Y-%m-%d %H:%M:%S')\
-                             - datetime.strptime(split_start, '%Y-%m-%d %H:%M:%S')
-                splittime = str(time_delta).split(':')
-                total_time = QtCore.QTime(int(splittime[0]), int(splittime[1]), int(splittime[2]))
-                self.ui.total_time.setTime(total_time)
-            yield
-
-    def start(self, pass_time=None):
-        self.stop()
-        self._generator = self.loop_generator(pass_time=pass_time)
-        self._timerId = self.startTimer(1000)
-
-    def stop(self):
-        if self._timerId is not None:
-            self.killTimer(self._timerId)
-        self._timerId = None
-        self._generator = None
-
-    def timerEvent(self, event):
-        if self._generator is None:
-            return
-        try:
-            next(self._generator)
-        except StopIteration:
-            self.stop()
-
-    def iso_to_qt_datetime(self, iso_datetime=None):
-        qt_datetime = None
-        if iso_datetime:
-            iso_date = iso_datetime.split('T')[0]
-            iso_time = iso_datetime.split('T')[1]
-            iso_time = iso_time.split('-')[0]
-            its = iso_time.split(':')
-            ids = iso_date.split('-')
-            qt_datetime = QtCore.QDateTime(int(ids[0]), int(ids[1]), int(ids[2]), int(its[0]), int(its[1]), int(its[2]))
-        return qt_datetime
+        self.ui.yes_btn_2.clicked.connect(partial(self.clock_in_ts_timesheet, ctx=self.get_sg_current_context()))
 
     # ------------------------------------------------------------------------------------------------------------------
     # T-Sheets Web Connection IO
@@ -592,6 +518,99 @@ class AppDialog(QtGui.QWidget):
     def no(self):
         self.close()
 
-    def yes(self):
-        print 'Yes Button Clicked.'
-        print 'From here, it will need to collect the data from the tool, and pass it to the clock out feature.'
+    def get_sg_translator(self, sg_task=None):
+        """
+        The T-Sheets Translator requires a special Shotgun page to be created.
+        The fields in the database are as follows:
+        Database Name:  code:                (str) A casual name of the database.
+        sgtask:         sg_sgtask:          (str-unique) The shotgun task. Specifically, '.main' namespaces are removed.
+        tstask:         sg_tstask:          (str) The T-Sheets name for a task
+        ts_short_code:  sg_ts_short_code:   (str) The ironically long name for a 3 letter code.
+        task_depts:     sg_task_grp:        (multi-entity) Returns the groups that are associated with tasks
+        people_override:sg_people_override: (multi-entity) Returns individuals assigned to specific tasks
+
+         :param:        sg_task:            (str) Shotgun task name from context
+        :return:        translation:        (dict) {
+                                                    task: sg_tstask
+                                                    short: sg_ts_short_code
+                                                    dept: sg_task_depts
+                                                    people: sg_people_override
+                                                    }
+        """
+        translation = {}
+        if sg_task:
+            if '.main' in sg_task:
+                task_name = sg_task.replace('.main', '')
+            else:
+                task_name = sg_task
+
+            task_name = task_name.lower()
+
+            filters = [
+                ['sg_sgtask', 'is', task_name]
+            ]
+            fields = [
+                'sg_sgtask',
+                'sg_tstask',
+                'sg_ts_short_code',
+                'sg_task_grp',
+                'sg_people_override'
+            ]
+            translation_data = self.sg.shotgun.find_one('CustomNonProjectEntity07', filters, fields=fields)
+
+            if translation_data:
+                task = translation_data['sg_tstask']
+                short = translation_data['sg_ts_short_code']
+                group = translation_data['sg_task_grp']
+                people = translation_data['sg_people_override']
+                translation = {'task': task, 'short': short, 'group': group, 'people': people}
+        return translation
+
+    def get_sg_current_context(self):
+        """
+        import sgtk
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        sg = engine.sgtk
+        ctx = engine.context
+        taskName = str(ctx).split(',')[0]
+        project = ctx.project['name']
+        entity = ctx.entity['type']
+        print project, entity, taskName
+        print ctx
+
+        masterTemplate Shot anim.main
+        anim.main, Shot MST110_029_370_cmp
+
+        :return:
+        """
+        context = {}
+        tk = sgtk
+        engine = tk.platform.current_engine()
+        ctx = engine.context
+        task_name = ctx.task['name']
+        task_id = ctx.task['id']
+        project = ctx.project['name']
+        project_id = ctx.project['id']
+        shot_id = ctx.entity['id']
+        shot = ctx.entity['name']
+        entity_type = ctx.entity['type']
+        if entity_type == 'Shot':
+            seq_data = self.get_sg_sequence_from_shot_id(shot_id)
+            for keys, name in seq_data.items():
+                seq = name
+                seq_id = keys
+        else:
+            seq = None
+            seq_id = None
+        context[project_id] = {
+            'task': task_name,
+            'task_id': task_id,
+            'context': entity_type,
+            'name': shot,
+            'shot_id': shot_id,
+            'project': project,
+            'sequence': seq,
+            'seq_id': seq_id
+        }
+        return context

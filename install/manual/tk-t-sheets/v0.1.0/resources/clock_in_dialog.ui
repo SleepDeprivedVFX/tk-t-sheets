@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>593</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QLabel" name="employee_name_2">
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Employee Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="statement">
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Arial&quot;;
+color: rgb(255, 0, 0);
+</string>
+       </property>
+       <property name="text">
+        <string>You are not Clocked In!</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="question">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Would you Like to Clock In to the Following?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_project">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Project Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_entity_label">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Asset / Shot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_task_label">
+       <property name="styleSheet">
+        <string notr="true">font: 8pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Task</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="yes_btn_2">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(0, 255, 0);
+font: 75 10pt &quot;Arial&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Yes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="no_btn_2">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>No</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <zorder>layoutWidget</zorder>
+  <zorder>employee_name_2</zorder>
+  <zorder>layoutWidget_2</zorder>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
